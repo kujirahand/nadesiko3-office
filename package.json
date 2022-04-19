@@ -1,0 +1,26 @@
+{
+  "name": "nadesiko3-office",
+  "version": "1.0.0",
+  "description": "Excel file for Nadesiko3 plugins",
+  "main": "nadesiko3-office.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kujirahand/nadesiko3-office.git"
+  },
+  "keywords": [
+    "excel",
+    "nadesiko3"
+  ],
+  "author": "kujirahand",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kujirahand/nadesiko3-office/issues"
+  },
+  "homepage": "https://github.com/kujirahand/nadesiko3-office#readme",
+  "dependencies": {
+    "exceljs": "^4.3.0"
+  }
+}
