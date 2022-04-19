@@ -155,20 +155,7 @@ const PluginOffice = {
             sys.__workbook.removeWorksheet(sheet.id)
         },
         return_none: true
-    },
-    'エクセルシート削除': { // @作業中のブックのシートNAMEを削除する // @えくせるしーとさくじょ
-        type: 'func',
-        josi: [['の','を']],
-        fn: function (name, sys) {
-            if (sys.__workbook === null) {
-                throw new Error(ERR_NO_WORKBOOK)
-            }
-            let sheet = sys.__workbook.getWorksheet(name)
-            if (!sheet) { throw new Error(`『EXCELシート削除』でシート『${name}』が見当たりません。`) }
-            sys.__workbook.removeWorksheet(sheet.id)
-        },
-        return_none: true
-    },
+    }
 }
 
 // モジュールのエクスポート(必ず必要)
