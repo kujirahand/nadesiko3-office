@@ -5,6 +5,8 @@
  */
 
 const Excel = require('exceljs')
+const Color = require('./colors.js')
+const Utils = require('./utils.js')
 const ERR_NO_WORKBOOK = 'Excel関連の命令を使う時は、最初に『EXCEL新規ブック』や『EXCEL開』などでブックを用意してください。'
 
 const PluginOffice = {
@@ -28,8 +30,9 @@ const PluginOffice = {
         type: 'func',
         josi: [],
         fn: function (sys) {
-            const workbook = new ExcelJS.Workbook()
+            const workbook = new Excel.Workbook()
             sys.__workbook = workbook
+            sys.__worksheet = workbook.addWorksheet()
             return workbook
         }
     },
@@ -59,7 +62,7 @@ const PluginOffice = {
         },
         return_none: true
     },
-    'エクセルCSV保存': { // @ファイルFILEへ作業中のExcelワークブックをCSVで保存する // @えくせるCSVほぞん
+    'エクセルCSV保存': { // @ファイルFILEへ作業中のExcelワークブックをCSVで保存する(ただしUTF-8のCSVとなる) // @えくせるCSVほぞん
         type: 'func',
         josi: [['へ', 'に']],
         asyncFn: true,
@@ -106,7 +109,7 @@ const PluginOffice = {
             return sheet
         }
     },
-    'エクセルセル設定': { // @セルA(例えば「A1」)へVを設定する // @えくせるせるせってい
+    'エクセルセル設定': { // @セル(例えば「A1」)へVを設定する // @えくせるせるせってい
         type: 'func',
         josi: [['へ','に'],['を']],
         fn: function (cell, v, sys) {
@@ -114,11 +117,48 @@ const PluginOffice = {
                 throw new Error(ERR_NO_WORKBOOK)
             }
             const objCell = sys.__worksheet.getCell(cell)
-            objCell.value = v
+            if (v.substring(0, 1) === '=') {
+                objCell.value = { formula: v.substring(1) }
+            } else {
+                objCell.value = v
+            }
         },
         return_none: true
     },
-    'エクセルセル取得': { // @セルA(例えば「A1」)の値を取得して返す // @えくせるせるしゅとく
+    'エクセル設定': { // @セル(例えば「A1」)へVを設定する // @えくせるせってい
+        type: 'func',
+        josi: [['へ','に'],['を']],
+        fn: function (cell, v, sys) {
+            sys.__exec('エクセルセル設定', [cell, v, sys])
+        },
+        return_none: true
+    },
+    'エクセル一括設定': { // @左上のセル(例えば「A1」)を起点にして、二次元配列変数VALUESを一括設定する // @えくせるいっかつせってい
+        type: 'func',
+        josi: [['へ','に'],['を']],
+        fn: function (cell, values, sys) {
+            if (sys.__workbook === null) {
+                throw new Error(ERR_NO_WORKBOOK)
+            }
+            // LeftTop
+            if (cell.indexOf(':') >= 0) {
+                cell = cell.split(':')[0]
+            }
+            // update
+            const start = Utils.addressToPos(cell)
+            for (let row = 0; row < values.length; row++) {
+                const cells = values[row]
+                let excelRow = sys.__worksheet.getRow(start.row + row)
+                for (let col = 0; col < cells.length; col++) {
+                    const val = cells[col]
+                    excelRow.getCell(start.col + col).value = val
+                }
+                sys.__worksheet.getRow(start.row + row).commit()
+            }
+        },
+        return_none: true
+    },
+    'エクセルセル取得': { // @セル(例えば「A1」)の値を取得して返す // @えくせるせるしゅとく
         type: 'func',
         josi: [['から','を','の']],
         fn: function (cell, sys) {
@@ -129,7 +169,37 @@ const PluginOffice = {
             return objCell.value
         }
     },
-    'エクセルシート一覧取得': { // @作業中のブックのシート一覧取得して返す // @えくせるしーといちらんしゅとく
+    'エクセル取得': { // @セル(例えば「A1」)の値を取得して返す // @えくせるしゅとく
+        type: 'func',
+        josi: [['から','を','の']],
+        fn: function (cell, sys) {
+            return sys.__exec('エクセルセル取得', [cell, sys])
+        }
+    },
+    'エクセル一括取得': { // @左上のセルC1(例えば「A1」)から右下のC2までの値を取得して二次元配列変数で返す // @えくせるいっかつしゅとく
+        type: 'func',
+        josi: [['から'],['までの', 'まで','の']],
+        fn: function (c1, c2, sys) {
+            if (sys.__workbook === null) {
+                throw new Error(ERR_NO_WORKBOOK)
+            }
+            const result = []
+            const pos1 = Utils.addressToPos(c1)
+            const pos2 = Utils.addressToPos(c2)
+            // console.log(pos1)
+            // console.log(pos2)
+            for (let row = pos1.row; row <= pos2.row; row++) {
+                const cells = []
+                for (let col = pos1.col; col <= pos2.col; col++) {
+                    const v = sys.__worksheet.getRow(row).getCell(col).value
+                    cells.push(v)
+                }
+                result.push(cells)
+            }
+            return result
+        }
+    },
+    'エクセルシート列挙': { // @作業中のブックのシート一覧取得して返す // @えくせるしーとれっきょ
         type: 'func',
         josi: [],
         fn: function (sys) {
@@ -155,7 +225,63 @@ const PluginOffice = {
             sys.__workbook.removeWorksheet(sheet.id)
         },
         return_none: true
-    }
+    },
+    'エクセルセル幅設定': { // @作業中のシートcol列目の幅をWに設定する // @えくせるせるはばせってい
+        type: 'func',
+        josi: [['を'],['に','へ']],
+        fn: function (col, w, sys) {
+            if (sys.__workbook === null) {
+                throw new Error(ERR_NO_WORKBOOK)
+            }
+            sys.__worksheet.getColumn(col).width = w
+        },
+        return_none: true
+    },
+    'エクセル背景色設定': { // @作業中シートのセルcells(例「A1」「A1:C3」)の背景色をcolorに設定 // @えくせるはいけいしょくせってい
+        type: 'func',
+        josi: [['を'],['に','へ']],
+        fn: function (cells, color, sys) {
+            if (sys.__workbook === null) {
+                throw new Error(ERR_NO_WORKBOOK)
+            }
+            const colorCode = Color.getColor(color)
+            const range = Utils.addressToPosRange(cells)
+            for (let row = range[0].row; row <= range[1].row; row++) {
+                for (let col = range[0].col; col <= range[1].col; col++) {
+                    const cell = sys.__worksheet.getRow(row).getCell(col)
+                    // cell.fill issue exceljs#791
+                    cell.style = JSON.parse(JSON.stringify(cell.style))
+                    // set fill
+                    cell.style.fill = {
+                        type: 'pattern',
+                        pattern: 'solid',
+                        fgColor: { argb: colorCode }
+                    }
+                }
+                sys.__worksheet.getRow(row).commit()
+            }
+        },
+        return_none: true
+    },
+    'エクセル文字色設定': { // @作業中シートのセルcells(例「A1」「A1:C3」)の文字色をcolorに設定 // @えくせるもじいろせってい
+        type: 'func',
+        josi: [['を'],['に','へ']],
+        fn: function (cells, color, sys) {
+            if (sys.__workbook === null) {
+                throw new Error(ERR_NO_WORKBOOK)
+            }
+            const colorCode = Color.getColor(color)
+            const range = Utils.addressToPosRange(cells)
+            for (let row = range[0].row; row <= range[1].row; row++) {
+                for (let col = range[0].col; col <= range[1].col; col++) {
+                    const cell = sys.__worksheet.getRow(row).getCell(col)
+                    cell.style = JSON.parse(JSON.stringify(cell.style))
+                    cell.font = {...cell.font, color: {argb: colorCode}}
+                }
+            }
+        },
+        return_none: true
+    },
 }
 
 // モジュールのエクスポート(必ず必要)
