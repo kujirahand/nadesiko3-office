@@ -121,7 +121,7 @@ const PluginOffice = {
     'エクセルセル取得': { // @セルA(例えば「A1」)の値を取得して返す // @えくせるせるしゅとく
         type: 'func',
         josi: [['から','を','の']],
-        fn: function (cell, v, sys) {
+        fn: function (cell, sys) {
             if (sys.__workbook === null) {
                 throw new Error(ERR_NO_WORKBOOK)
             }
