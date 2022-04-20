@@ -4,7 +4,6 @@
   "description": "Excel file for Nadesiko3 plugins",
   "main": "nadesiko3-office.js",
   "scripts": {
-    "test": "mocha"
   },
   "repository": {
     "type": "git",
