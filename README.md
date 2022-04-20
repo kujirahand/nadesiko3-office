@@ -2,12 +2,14 @@
 
 [日本語プログラミング言語「なでしこ3」](https://nadesi.com)用のプラグインです。
 
-# インストールの方法
+Excelファイルを読み書きできます。Excelファイルを直接書き換えるため、Excel自体のインストールは不要です。
+
+## プラグインのインストールの方法
 
 - [Windows版](https://github.com/kujirahand/nadesiko3win32)の場合、「npm-install.vbs」というスクリプトがあるので、このスクリプトを実行して、「nadesiko3-office」と入力します。
 - macOS/Linuxの場合、Node.jsをインストールした環境で、ターミナルで`npm install nadesiko3-office`とコマンドを実行します。
 
-# 利用例
+## 利用例
 
 [リポジトリのsample](https://github.com/kujirahand/nadesiko3-office/tree/master/sample)フォルダに簡単な使い方のサンプルがあります。
 
@@ -22,6 +24,8 @@
 「test-out.xlsx」へエクセル保存。
 ```
 
+## 備考
 
+なでしこv1のエクセル命令は、「エクセル起動」が必須でしたが、なでしこv3では不要です。直接『エクセル新規ブック』あるいは『エクセル開く』命令を使って、Excel操作を始めます。
 
 
