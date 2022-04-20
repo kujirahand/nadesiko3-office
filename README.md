@@ -9,6 +9,10 @@ Excelファイルを読み書きできます。Excelファイルを直接書き�
 - [Windows版](https://github.com/kujirahand/nadesiko3win32)の場合、「npm-install.vbs」というスクリプトがあるので、このスクリプトを実行して、「nadesiko3-office」と入力します。
 - macOS/Linuxの場合、Node.jsをインストールした環境で、ターミナルで`npm install nadesiko3-office`とコマンドを実行します。
 
+## 利用可能な命令
+
+- [なでしこさんマニュアル > nadesiko3-office](https://nadesi.com/v3/doc/index.php?nadesiko3-office&show)より利用可能な命令の一覧を確認できます。
+
 ## 利用例
 
 [リポジトリのsample](https://github.com/kujirahand/nadesiko3-office/tree/master/sample)フォルダに簡単な使い方のサンプルがあります。
