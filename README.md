@@ -3,12 +3,12 @@
 [日本語プログラミング言語「なでしこ3」](https://nadesi.com)用のプラグインです。
 
 Excelファイルを読み書きできます。Excelファイルを直接書き換えるため、Excel自体のインストールは不要です。
+Win/Mac/Linuxで使えます。
 
 ## プラグインのインストールの方法
 
-- [Windows版](https://github.com/kujirahand/nadesiko3win32)の場合、「npm-install.vbs」というスクリプトがあるので、このスクリプトを実行して、「nadesiko3-office」と入力します。
+- [Windows版](https://github.com/kujirahand/nadesiko3win32)の場合、実行ファイル「start.exe」を起動した後、「拡張プラグインのインストール」をクリックして「nadesiko3-office」と入力します。
 - macOS/Linuxの場合、Node.jsをインストールした環境で、ターミナルで`npm install nadesiko3-office`とコマンドを実行します。
-- [簡単なWindowsのための使い方ガイド(PDF)](https://github.com/kujirahand/nadesiko3-office/releases/tag/1.0.0#:~:text=guide%2Dfor%2Dwindows.pdf)があります。参考にどうぞ。
 
 ## 利用可能な命令
 
