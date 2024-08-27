@@ -1,6 +1,6 @@
 {
   "name": "nadesiko3-office",
-  "version": "1.0.0",
+  "version": "3.6.16",
   "description": "Excel file for Nadesiko3 plugins",
   "main": "nadesiko3-office.js",
   "scripts": {
@@ -20,6 +20,6 @@
   },
   "homepage": "https://github.com/kujirahand/nadesiko3-office#readme",
   "dependencies": {
-    "exceljs": "^4.3.0"
+    "exceljs": "^4.4.0"
   }
 }

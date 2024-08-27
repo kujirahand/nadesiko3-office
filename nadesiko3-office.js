@@ -10,15 +10,25 @@ const Utils = require('./utils.js')
 const ERR_NO_WORKBOOK = 'Excel関連の命令を使う時は、最初に『EXCEL新規ブック』や『EXCEL開』などでブックを用意してください。'
 
 const PluginOffice = {
+    'meta': {
+        type: 'const',
+        value: { // プラグインに関する情報を指定する
+            pluginName: 'nadesiko3-office', // プラグインの名前
+            description: 'Excelプラグイン', // プラグインの説明
+            pluginVersion: '3.6.16', // プラグインのバージョン
+            nakoRuntime: ['cnako'], // 対象ランタイム
+            nakoVersion: '3.6.16' // 要求なでしこバージョン
+        }
+    },
     '初期化': {
         type: 'func',
         josi: [],
         fn: function (sys) {
             // ここにプラグインの初期化処理
-            sys.__varslist[0]['OFFICEバージョン'] = '0.0.1'
+            sys.__setSysVar('OFFICEバージョン', '3.6.16')
             // Excelのインスタンス
-            sys.__workbook = null
-            sys.__worksheet = null
+            sys.tags.__workbook = null
+            sys.tags.__worksheet = null
         }
     },
 
@@ -31,8 +41,8 @@ const PluginOffice = {
         josi: [],
         fn: function (sys) {
             const workbook = new Excel.Workbook()
-            sys.__workbook = workbook
-            sys.__worksheet = workbook.addWorksheet()
+            sys.tags.__workbook = workbook
+            sys.tags.__worksheet = workbook.addWorksheet()
             return workbook
         }
     },
@@ -42,10 +52,10 @@ const PluginOffice = {
         asyncFn: true,
         fn: async function (file, sys) {
             const workbook = new Excel.Workbook()
-            sys.__workbook = workbook
+            sys.tags.__workbook = workbook
             await workbook.xlsx.readFile(file)
             if (workbook.worksheets.length > 0) {
-                sys.__worksheet = workbook.worksheets[0]
+                sys.tags.__worksheet = workbook.worksheets[0]
             }
             return workbook
         }
@@ -55,10 +65,10 @@ const PluginOffice = {
         josi: [['へ', 'に']],
         asyncFn: true,
         fn: async function (file, sys) {
-            if (sys.__workbook === null) {
+            if (sys.tags.__workbook === null) {
                 throw new Error(ERR_NO_WORKBOOK)
             }
-            sys.__workbook.xlsx.writeFile(file)
+            sys.tags.__workbook.xlsx.writeFile(file)
         },
         return_none: true
     },
@@ -67,10 +77,10 @@ const PluginOffice = {
         josi: [['へ', 'に']],
         asyncFn: true,
         fn: async function (file, sys) {
-            if (sys.__workbook === null) {
+            if (sys.tags.__workbook === null) {
                 throw new Error(ERR_NO_WORKBOOK)
             }
-            sys.__workbook.csv.writeFile(file)
+            sys.tags.__workbook.csv.writeFile(file)
         },
         return_none: true
     },
@@ -78,11 +88,11 @@ const PluginOffice = {
         type: 'func',
         josi: [['の', 'で']],
         fn: function (name, sys) {
-            if (sys.__workbook === null) {
+            if (sys.tags.__workbook === null) {
                 sys.__exec('EXCEL新規ブック', [sys])
             }
-            const sheet = sys.__workbook.addWorksheet(name)
-            sys.__worksheet = sheet
+            const sheet = sys.tags.__workbook.addWorksheet(name)
+            sys.tags.__worksheet = sheet
             return sheet
         }
     },
@@ -90,10 +100,10 @@ const PluginOffice = {
         type: 'func',
         josi: [['の']],
         fn: function (name, sys) {
-            if (sys.__workbook === null) {
+            if (sys.tags.__workbook === null) {
                 throw new Error(ERR_NO_WORKBOOK)
             }
-            const sheet = sys.__workbook.getWorksheet(name)
+            const sheet = sys.tags.__workbook.getWorksheet(name)
             return sheet
         }
     },
@@ -101,11 +111,11 @@ const PluginOffice = {
         type: 'func',
         josi: [['の','に','を']],
         fn: function (name, sys) {
-            if (sys.__workbook === null) {
+            if (sys.tags.__workbook === null) {
                 throw new Error(ERR_NO_WORKBOOK)
             }
-            const sheet = sys.__workbook.getWorksheet(name)
-            sys.__worksheet = sheet
+            const sheet = sys.tags.__workbook.getWorksheet(name)
+            sys.tags.__worksheet = sheet
             return sheet
         }
     },
@@ -113,10 +123,10 @@ const PluginOffice = {
         type: 'func',
         josi: [['へ','に'],['を']],
         fn: function (cell, v, sys) {
-            if (sys.__workbook === null) {
+            if (sys.tags.__workbook === null) {
                 throw new Error(ERR_NO_WORKBOOK)
             }
-            const objCell = sys.__worksheet.getCell(cell)
+            const objCell = sys.tags.__worksheet.getCell(cell)
             if (v.substring(0, 1) === '=') {
                 objCell.value = { formula: v.substring(1) }
             } else {
@@ -137,7 +147,7 @@ const PluginOffice = {
         type: 'func',
         josi: [['へ','に'],['を']],
         fn: function (cell, values, sys) {
-            if (sys.__workbook === null) {
+            if (sys.tags.__workbook === null) {
                 throw new Error(ERR_NO_WORKBOOK)
             }
             // LeftTop
@@ -148,12 +158,12 @@ const PluginOffice = {
             const start = Utils.addressToPos(cell)
             for (let row = 0; row < values.length; row++) {
                 const cells = values[row]
-                let excelRow = sys.__worksheet.getRow(start.row + row)
+                let excelRow = sys.tags.__worksheet.getRow(start.row + row)
                 for (let col = 0; col < cells.length; col++) {
                     const val = cells[col]
                     excelRow.getCell(start.col + col).value = val
                 }
-                sys.__worksheet.getRow(start.row + row).commit()
+                sys.tags.__worksheet.getRow(start.row + row).commit()
             }
         },
         return_none: true
@@ -162,10 +172,10 @@ const PluginOffice = {
         type: 'func',
         josi: [['から','を','の']],
         fn: function (cell, sys) {
-            if (sys.__workbook === null) {
+            if (sys.tags.__workbook === null) {
                 throw new Error(ERR_NO_WORKBOOK)
             }
-            const objCell = sys.__worksheet.getCell(cell)
+            const objCell = sys.tags.__worksheet.getCell(cell)
             return objCell.value
         }
     },
@@ -180,7 +190,7 @@ const PluginOffice = {
         type: 'func',
         josi: [['から'],['までの', 'まで','の']],
         fn: function (c1, c2, sys) {
-            if (sys.__workbook === null) {
+            if (sys.tags.__workbook === null) {
                 throw new Error(ERR_NO_WORKBOOK)
             }
             const result = []
@@ -191,7 +201,7 @@ const PluginOffice = {
             for (let row = pos1.row; row <= pos2.row; row++) {
                 const cells = []
                 for (let col = pos1.col; col <= pos2.col; col++) {
-                    const v = sys.__worksheet.getRow(row).getCell(col).value
+                    const v = sys.tags.__worksheet.getRow(row).getCell(col).value
                     cells.push(v)
                 }
                 result.push(cells)
@@ -203,11 +213,11 @@ const PluginOffice = {
         type: 'func',
         josi: [],
         fn: function (sys) {
-            if (sys.__workbook === null) {
+            if (sys.tags.__workbook === null) {
                 throw new Error(ERR_NO_WORKBOOK)
             }
             const names = []
-            sys.__workbook.eachSheet(function(sheet, id){
+            sys.tags.__workbook.eachSheet(function(sheet, id){
                 names.push(sheet.name)
             })
             return names
@@ -217,12 +227,12 @@ const PluginOffice = {
         type: 'func',
         josi: [['の','を']],
         fn: function (name, sys) {
-            if (sys.__workbook === null) {
+            if (sys.tags.__workbook === null) {
                 throw new Error(ERR_NO_WORKBOOK)
             }
-            let sheet = sys.__workbook.getWorksheet(name)
+            let sheet = sys.tags.__workbook.getWorksheet(name)
             if (!sheet) { throw new Error(`『EXCELシート削除』でシート『${name}』が見当たりません。`) }
-            sys.__workbook.removeWorksheet(sheet.id)
+            sys.tags.__workbook.removeWorksheet(sheet.id)
         },
         return_none: true
     },
@@ -230,10 +240,10 @@ const PluginOffice = {
         type: 'func',
         josi: [['を'],['に','へ']],
         fn: function (col, w, sys) {
-            if (sys.__workbook === null) {
+            if (sys.tags.__workbook === null) {
                 throw new Error(ERR_NO_WORKBOOK)
             }
-            sys.__worksheet.getColumn(col).width = w
+            sys.tags.__worksheet.getColumn(col).width = w
         },
         return_none: true
     },
@@ -241,14 +251,14 @@ const PluginOffice = {
         type: 'func',
         josi: [['を'],['に','へ']],
         fn: function (cells, color, sys) {
-            if (sys.__workbook === null) {
+            if (sys.tags.__workbook === null) {
                 throw new Error(ERR_NO_WORKBOOK)
             }
             const colorCode = Color.getColor(color)
             const range = Utils.addressToPosRange(cells)
             for (let row = range[0].row; row <= range[1].row; row++) {
                 for (let col = range[0].col; col <= range[1].col; col++) {
-                    const cell = sys.__worksheet.getRow(row).getCell(col)
+                    const cell = sys.tags.__worksheet.getRow(row).getCell(col)
                     // cell.fill issue exceljs#791
                     cell.style = JSON.parse(JSON.stringify(cell.style))
                     // set fill
@@ -258,7 +268,7 @@ const PluginOffice = {
                         fgColor: { argb: colorCode }
                     }
                 }
-                sys.__worksheet.getRow(row).commit()
+                sys.tags.__worksheet.getRow(row).commit()
             }
         },
         return_none: true
@@ -267,14 +277,14 @@ const PluginOffice = {
         type: 'func',
         josi: [['を'],['に','へ']],
         fn: function (cells, color, sys) {
-            if (sys.__workbook === null) {
+            if (sys.tags.__workbook === null) {
                 throw new Error(ERR_NO_WORKBOOK)
             }
             const colorCode = Color.getColor(color)
             const range = Utils.addressToPosRange(cells)
             for (let row = range[0].row; row <= range[1].row; row++) {
                 for (let col = range[0].col; col <= range[1].col; col++) {
-                    const cell = sys.__worksheet.getRow(row).getCell(col)
+                    const cell = sys.tags.__worksheet.getRow(row).getCell(col)
                     cell.style = JSON.parse(JSON.stringify(cell.style))
                     cell.font = {...cell.font, color: {argb: colorCode}}
                 }
