@@ -4,6 +4,7 @@
   "description": "Excel file for Nadesiko3 plugins",
   "main": "nadesiko3-office.js",
   "scripts": {
+    "test": "node --test"
   },
   "repository": {
     "type": "git",
@@ -20,6 +21,6 @@
   },
   "homepage": "https://github.com/kujirahand/nadesiko3-office#readme",
   "dependencies": {
-    "exceljs": "^4.4.0"
+    "exceljs": "3.4.0"
   }
 }

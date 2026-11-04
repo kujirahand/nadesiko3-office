@@ -209,6 +209,37 @@ const PluginOffice = {
             return result
         }
     },
+    'エクセル行数取得': { // @作業中のシートの最終行番号を返す // @えくせるぎょうすうしゅとく
+        type: 'func',
+        josi: [],
+        fn: function (sys) {
+            if (sys.tags.__workbook === null) throw new Error(ERR_NO_WORKBOOK)
+            if (!sys.tags.__worksheet) throw new Error('作業中のシートがありません。')
+            return sys.tags.__worksheet.rowCount
+        }
+    },
+    'エクセルシート全取得': { // @作業中のシートの全セルを二次元配列で返す // @えくせるしーとぜんしゅとく
+        type: 'func',
+        josi: [],
+        fn: function (sys) {
+            if (sys.tags.__workbook === null) throw new Error(ERR_NO_WORKBOOK)
+            const sheet = sys.tags.__worksheet
+            if (!sheet) throw new Error('作業中のシートがありません。')
+            const result = []
+            const rows = sheet.rowCount
+            const columns = sheet.columnCount
+            for (let row = 1; row <= rows; row++) {
+                const cells = []
+                const sheetRow = sheet.findRow(row)
+                for (let col = 1; col <= columns; col++) {
+                    const cell = sheetRow && sheetRow.findCell(col)
+                    cells.push(cell ? cell.value : null)
+                }
+                result.push(cells)
+            }
+            return result
+        }
+    },
     'エクセルシート列挙': { // @作業中のブックのシート一覧取得して返す // @えくせるしーとれっきょ
         type: 'func',
         josi: [],
