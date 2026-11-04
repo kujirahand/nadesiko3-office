@@ -18,7 +18,7 @@ const PluginOffice = {
         value: { // プラグインに関する情報を指定する
             pluginName: 'nadesiko3-office', // プラグインの名前
             description: 'Excelプラグイン', // プラグインの説明
-            pluginVersion: '3.6.16', // プラグインのバージョン
+            pluginVersion: '3.8.9', // プラグインのバージョン
             nakoRuntime: ['cnako'], // 対象ランタイム
             nakoVersion: '3.6.16' // 要求なでしこバージョン
         }
@@ -28,7 +28,7 @@ const PluginOffice = {
         josi: [],
         fn: function (sys) {
             // ここにプラグインの初期化処理
-            sys.__setSysVar('OFFICEバージョン', '3.6.16')
+            sys.__setSysVar('OFFICEバージョン', '3.8.9')
             // エクセルシート全取得で読み込めるセル数(行数×列数)の上限
             sys.__setSysVar('エクセル全取得最大セル数', DEFAULT_MAX_CELLS)
             // Excelのインスタンス
