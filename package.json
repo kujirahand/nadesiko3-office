@@ -1,9 +1,10 @@
 {
   "name": "nadesiko3-office",
-  "version": "3.6.16",
+  "version": "3.8.9",
   "description": "Excel file for Nadesiko3 plugins",
   "main": "nadesiko3-office.js",
   "scripts": {
+    "test": "node --test"
   },
   "repository": {
     "type": "git",

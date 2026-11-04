@@ -9,13 +9,16 @@ const Color = require('./colors.js')
 const Utils = require('./utils.js')
 const ERR_NO_WORKBOOK = 'Excel関連の命令を使う時は、最初に『EXCEL新規ブック』や『EXCEL開』などでブックを用意してください。'
 
+// 『エクセルシート全取得』の既定の上限セル数(約100万セル。配列で数十MB程度)
+const DEFAULT_MAX_CELLS = 1000000
+
 const PluginOffice = {
     'meta': {
         type: 'const',
         value: { // プラグインに関する情報を指定する
             pluginName: 'nadesiko3-office', // プラグインの名前
             description: 'Excelプラグイン', // プラグインの説明
-            pluginVersion: '3.6.16', // プラグインのバージョン
+            pluginVersion: '3.8.9', // プラグインのバージョン
             nakoRuntime: ['cnako'], // 対象ランタイム
             nakoVersion: '3.6.16' // 要求なでしこバージョン
         }
@@ -25,7 +28,9 @@ const PluginOffice = {
         josi: [],
         fn: function (sys) {
             // ここにプラグインの初期化処理
-            sys.__setSysVar('OFFICEバージョン', '3.6.16')
+            sys.__setSysVar('OFFICEバージョン', '3.8.9')
+            // エクセルシート全取得で読み込めるセル数(行数×列数)の上限
+            sys.__setSysVar('エクセル全取得最大セル数', DEFAULT_MAX_CELLS)
             // Excelのインスタンス
             sys.tags.__workbook = null
             sys.tags.__worksheet = null
@@ -203,6 +208,41 @@ const PluginOffice = {
                 for (let col = pos1.col; col <= pos2.col; col++) {
                     const v = sys.tags.__worksheet.getRow(row).getCell(col).value
                     cells.push(v)
+                }
+                result.push(cells)
+            }
+            return result
+        }
+    },
+    'エクセル行数取得': { // @作業中のシートの最終行番号を返す // @えくせるぎょうすうしゅとく
+        type: 'func',
+        josi: [],
+        fn: function (sys) {
+            if (sys.tags.__workbook === null) throw new Error(ERR_NO_WORKBOOK)
+            if (!sys.tags.__worksheet) throw new Error('作業中のシートがありません。')
+            return sys.tags.__worksheet.rowCount
+        }
+    },
+    'エクセルシート全取得': { // @作業中のシートの全セルを二次元配列で返す // @えくせるしーとぜんしゅとく
+        type: 'func',
+        josi: [],
+        fn: function (sys) {
+            if (sys.tags.__workbook === null) throw new Error(ERR_NO_WORKBOOK)
+            const sheet = sys.tags.__worksheet
+            if (!sheet) throw new Error('作業中のシートがありません。')
+            const result = []
+            const rows = sheet.rowCount
+            const columns = sheet.columnCount
+            const maxCells = sys.__getSysVar('エクセル全取得最大セル数')
+            if (rows * columns > maxCells) {
+                throw new Error(`シートが大きすぎます(${rows}行×${columns}列)。『エクセル全取得最大セル数』(現在${maxCells})を増やすか、『エクセル一括取得』で範囲を指定してください。`)
+            }
+            for (let row = 1; row <= rows; row++) {
+                const cells = []
+                const sheetRow = sheet.findRow(row)
+                for (let col = 1; col <= columns; col++) {
+                    const cell = sheetRow && sheetRow.findCell(col)
+                    cells.push(cell ? cell.value : null)
                 }
                 result.push(cells)
             }
