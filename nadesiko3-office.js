@@ -9,6 +9,9 @@ const Color = require('./colors.js')
 const Utils = require('./utils.js')
 const ERR_NO_WORKBOOK = 'Excel関連の命令を使う時は、最初に『EXCEL新規ブック』や『EXCEL開』などでブックを用意してください。'
 
+// 『エクセルシート全取得』の既定の上限セル数(約100万セル。配列で数十MB程度)
+const DEFAULT_MAX_CELLS = 1000000
+
 const PluginOffice = {
     'meta': {
         type: 'const',
@@ -26,6 +29,8 @@ const PluginOffice = {
         fn: function (sys) {
             // ここにプラグインの初期化処理
             sys.__setSysVar('OFFICEバージョン', '3.6.16')
+            // エクセルシート全取得で読み込めるセル数(行数×列数)の上限
+            sys.__setSysVar('エクセル全取得最大セル数', DEFAULT_MAX_CELLS)
             // Excelのインスタンス
             sys.tags.__workbook = null
             sys.tags.__worksheet = null
@@ -228,6 +233,10 @@ const PluginOffice = {
             const result = []
             const rows = sheet.rowCount
             const columns = sheet.columnCount
+            const maxCells = sys.__getSysVar('エクセル全取得最大セル数')
+            if (rows * columns > maxCells) {
+                throw new Error(`シートが大きすぎます(${rows}行×${columns}列)。『エクセル全取得最大セル数』(現在${maxCells})を増やすか、『エクセル一括取得』で範囲を指定してください。`)
+            }
             for (let row = 1; row <= rows; row++) {
                 const cells = []
                 const sheetRow = sheet.findRow(row)

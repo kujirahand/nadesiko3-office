@@ -3,7 +3,8 @@ const assert = require('node:assert/strict')
 const plugin = require('../nadesiko3-office.js')
 
 function setup() {
-    const sys = { tags: {}, __setSysVar() {} }
+    const variables = {}
+    const sys = { tags: {}, __setSysVar(k, v) { variables[k] = v }, __getSysVar: k => variables[k] }
     sys.__exec = (name, args) => plugin[name].fn(...args)
     plugin['初期化'].fn(sys)
     return sys
@@ -266,4 +267,15 @@ test('書式だけの行も行数に含め、取得はシートを変更しな�
     assert.deepEqual(plugin['エクセルシート全取得'].fn(sys), expected)
     assert.equal(sheet.findRow(1), undefined)
     assert.equal(sheet.getCell('C4').font.bold, true)
+})
+
+test('エクセルシート全取得: セル数が上限を超えるとエラーになる', () => {
+    const sys = setup()
+    assert.equal(sys.__getSysVar('エクセル全取得最大セル数'), 1000000)
+    plugin['エクセル新規ブック'].fn(sys)
+    plugin['エクセルセル設定'].fn('C2', '値', sys)
+    sys.__setSysVar('エクセル全取得最大セル数', 5)
+    assert.throws(() => plugin['エクセルシート全取得'].fn(sys), /大きすぎます/)
+    sys.__setSysVar('エクセル全取得最大セル数', 6)
+    assert.equal(plugin['エクセルシート全取得'].fn(sys).length, 2)
 })

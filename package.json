@@ -21,6 +21,6 @@
   },
   "homepage": "https://github.com/kujirahand/nadesiko3-office#readme",
   "dependencies": {
-    "exceljs": "3.4.0"
+    "exceljs": "^4.4.0"
   }
 }
